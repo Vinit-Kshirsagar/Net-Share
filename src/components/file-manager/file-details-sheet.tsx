@@ -8,12 +8,11 @@ import {
   ShieldCheck,
   ShieldAlert,
   Download,
-  Clock,
   HardDrive,
   FileCode,
   Calendar,
   Layers,
-  Activity
+  Share2
 } from 'lucide-react'
 import {
   Sheet,
@@ -21,8 +20,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { FileRow } from '@/types/netshare'
 import { formatBytes, formatDate, formatThroughput } from '@/lib/utils'
 import { downloadAndVerifyFile, DownloadResult } from './download-verifier'
@@ -76,11 +73,11 @@ export function FileDetailsSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="bg-slate-900 border-slate-800 text-slate-100 sm:max-w-md overflow-y-auto">
-        <SheetHeader className="border-b border-slate-800 pb-4">
-          <SheetTitle className="text-white flex items-center gap-2.5 text-base">
-            <div className="h-8 w-8 rounded-lg bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
-              <FileText className="h-4 w-4" />
+      <SheetContent className="bg-[#111111] border-l border-white/10 text-white sm:max-w-md overflow-y-auto p-6">
+        <SheetHeader className="border-b border-white/10 pb-5">
+          <SheetTitle className="text-white flex items-center gap-3 text-base font-bold">
+            <div className="h-9 w-9 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-white shrink-0">
+              <FileText className="h-5 w-5" />
             </div>
             <span className="truncate">{file.name}</span>
           </SheetTitle>
@@ -90,13 +87,13 @@ export function FileDetailsSheet({
           {/* Integrity / Verification Status Banner */}
           {downloadResult && (
             <div
-              className={`p-3.5 rounded-xl border animate-in fade-in ${
+              className={`p-4 rounded-xl border animate-in fade-in ${
                 downloadResult.integrity.status === 'matched'
                   ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                  : 'bg-red-500/10 border-red-500/30 text-red-300'
+                  : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
               }`}
             >
-              <div className="flex items-center gap-2 font-semibold text-sm mb-1.5">
+              <div className="flex items-center gap-2 font-bold text-sm mb-1.5">
                 {downloadResult.integrity.status === 'matched' ? (
                   <>
                     <ShieldCheck className="h-5 w-5 text-emerald-400" />
@@ -104,26 +101,26 @@ export function FileDetailsSheet({
                   </>
                 ) : (
                   <>
-                    <ShieldAlert className="h-5 w-5 text-red-400" />
-                    <span>Integrity Mismatch!</span>
+                    <ShieldAlert className="h-5 w-5 text-rose-400" />
+                    <span>Integrity Mismatch Detected</span>
                   </>
                 )}
               </div>
               <p className="text-[11px] leading-relaxed opacity-90">
                 {downloadResult.integrity.status === 'matched'
-                  ? 'The received bytes match the expected SHA-256 checksum exactly byte-for-byte.'
-                  : 'The downloaded bytes do not match the expected checksum! The file may have been altered or corrupted in transit.'}
+                  ? 'The received bytes match the stored SHA-256 digest byte-for-byte.'
+                  : 'The downloaded bytes do not match expected checksum! Alteration detected.'}
               </p>
-              <div className="mt-2.5 pt-2 border-t border-emerald-500/20 grid grid-cols-2 gap-2 text-[11px] font-mono">
+              <div className="mt-3 pt-2.5 border-t border-emerald-500/20 grid grid-cols-2 gap-2 text-[11px] font-mono">
                 <div>
-                  <span className="text-slate-400">Duration:</span>{' '}
-                  <span className="font-semibold text-white">
+                  <span className="text-white/50">Duration:</span>{' '}
+                  <span className="font-bold text-white">
                     {Math.round(downloadResult.durationMs)} ms
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400">Throughput:</span>{' '}
-                  <span className="font-semibold text-white">
+                  <span className="text-white/50">Throughput:</span>{' '}
+                  <span className="font-bold text-white">
                     {formatThroughput(downloadResult.bytesTransferred, downloadResult.durationMs)}
                   </span>
                 </div>
@@ -132,51 +129,51 @@ export function FileDetailsSheet({
           )}
 
           {downloadError && (
-            <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400">
-              <div className="font-semibold mb-1">Download Error</div>
+            <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300">
+              <div className="font-bold mb-1">Download Error</div>
               <p className="text-[11px]">{downloadError}</p>
             </div>
           )}
 
           {/* Action buttons */}
-          <div className="flex gap-2">
-            <Button
+          <div className="flex gap-2.5">
+            <button
               onClick={handleDownloadAndVerify}
               disabled={isDownloading}
-              className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-medium"
+              className="linear-button-primary flex-1 h-11 rounded-xl text-xs uppercase tracking-wider disabled:opacity-50"
             >
               {isDownloading ? (
                 <>
-                  <div className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                  <div className="h-3.5 w-3.5 border-2 border-black/30 border-t-black rounded-full animate-spin mr-2" />
                   {downloadProgress || 'Downloading...'}
                 </>
               ) : (
                 <>
-                  <Download className="h-4 w-4 mr-2" />
-                  Download & Verify SHA-256
+                  <Download className="h-4 w-4 mr-1.5" />
+                  Download & Verify
                 </>
               )}
-            </Button>
+            </button>
 
-            <Button
-              variant="outline"
+            <button
               onClick={() => onOpenShareModal(file)}
-              className="border-slate-800 text-slate-300 hover:bg-slate-800"
+              className="linear-button-secondary h-11 px-4 rounded-xl text-xs uppercase tracking-wider"
             >
-              Share Link
-            </Button>
+              <Share2 className="h-3.5 w-3.5 mr-1.5" />
+              Share
+            </button>
           </div>
 
           {/* SHA-256 Checksum Card */}
-          <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-            <div className="flex items-center justify-between text-slate-400">
-              <span className="font-semibold flex items-center gap-1.5 text-slate-300">
+          <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-2.5">
+            <div className="flex items-center justify-between text-white/50">
+              <span className="font-bold flex items-center gap-1.5 text-white text-[11px] uppercase tracking-wider">
                 <ShieldCheck className="h-4 w-4 text-emerald-400" />
-                SHA-256 Checksum
+                SHA-256 Digest
               </span>
               <button
                 onClick={copyHashToClipboard}
-                className="flex items-center gap-1 px-2 py-0.5 rounded bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 text-[10px]"
+                className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white/[0.04] border border-white/10 hover:border-white/30 text-white text-[10px] font-bold uppercase transition-all"
               >
                 {copiedHash ? (
                   <>
@@ -184,50 +181,50 @@ export function FileDetailsSheet({
                   </>
                 ) : (
                   <>
-                    <Copy className="h-3 w-3" /> Copy Hash
+                    <Copy className="h-3 w-3" /> Copy
                   </>
                 )}
               </button>
             </div>
-            <p className="font-mono text-[11px] text-slate-400 break-all bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80 leading-relaxed">
+            <p className="font-mono text-[11px] text-white/70 break-all bg-white/[0.02] p-3 rounded-lg border border-white/[0.06] leading-relaxed">
               {file.checksum_sha256 || 'None computed'}
             </p>
           </div>
 
           {/* Metadata Grid */}
-          <div className="space-y-3 divide-y divide-slate-800/80">
+          <div className="space-y-3 divide-y divide-white/[0.06]">
             <div className="flex justify-between items-center pt-2">
-              <span className="text-slate-400 flex items-center gap-1.5">
-                <HardDrive className="h-3.5 w-3.5 text-blue-400" /> Size
+              <span className="text-white/50 flex items-center gap-1.5">
+                <HardDrive className="h-3.5 w-3.5 text-white/70" /> Size
               </span>
-              <span className="font-mono text-slate-200">
+              <span className="font-mono text-white">
                 {formatBytes(file.size_bytes)} ({file.size_bytes.toLocaleString()} bytes)
               </span>
             </div>
 
             <div className="flex justify-between items-center pt-3">
-              <span className="text-slate-400 flex items-center gap-1.5">
-                <FileCode className="h-3.5 w-3.5 text-amber-400" /> MIME Type
+              <span className="text-white/50 flex items-center gap-1.5">
+                <FileCode className="h-3.5 w-3.5 text-white/70" /> MIME Type
               </span>
-              <span className="font-mono text-slate-200">
+              <span className="font-mono text-white/80">
                 {file.mime_type || 'application/octet-stream'}
               </span>
             </div>
 
             <div className="flex justify-between items-center pt-3">
-              <span className="text-slate-400 flex items-center gap-1.5">
-                <Layers className="h-3.5 w-3.5 text-indigo-400" /> Storage Path
+              <span className="text-white/50 flex items-center gap-1.5">
+                <Layers className="h-3.5 w-3.5 text-white/70" /> Storage Path
               </span>
-              <span className="font-mono text-slate-300 truncate max-w-[200px]" title={file.storage_path}>
+              <span className="font-mono text-white/80 truncate max-w-[200px]" title={file.storage_path}>
                 {file.storage_path}
               </span>
             </div>
 
             <div className="flex justify-between items-center pt-3">
-              <span className="text-slate-400 flex items-center gap-1.5">
-                <Calendar className="h-3.5 w-3.5 text-slate-400" /> Uploaded
+              <span className="text-white/50 flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5 text-white/70" /> Created
               </span>
-              <span className="text-slate-200">{formatDate(file.created_at)}</span>
+              <span className="text-white font-mono">{formatDate(file.created_at)}</span>
             </div>
           </div>
         </div>

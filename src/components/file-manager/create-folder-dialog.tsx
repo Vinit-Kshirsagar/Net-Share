@@ -9,8 +9,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 interface CreateFolderDialogProps {
@@ -64,53 +62,54 @@ export function CreateFolderDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-slate-900 border-slate-800 text-white">
+      <DialogContent className="sm:max-w-md bg-[#111111] border border-white/10 text-white rounded-2xl shadow-2xl p-6">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-base">
-            <FolderPlus className="h-5 w-5 text-blue-400" />
-            Create New Folder
+          <DialogTitle className="flex items-center gap-2 text-base font-bold tracking-tight">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+              <FolderPlus className="h-4 w-4" />
+            </div>
+            Create New Folder Node
           </DialogTitle>
         </DialogHeader>
 
         {error && (
-          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center gap-2 text-xs text-red-400">
+          <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center gap-2.5 text-xs text-red-400">
             <AlertCircle className="h-4 w-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleCreate} className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="folder-name" className="text-xs text-slate-300">
+        <form onSubmit={handleCreate} className="space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="folder-name" className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/60">
               Folder Name
             </Label>
-            <Input
+            <input
               id="folder-name"
-              placeholder="e.g. Network_Reports"
+              placeholder="e.g. Protocol_Logs"
               value={name}
               onChange={(e) => setName(e.target.value)}
               maxLength={100}
-              className="bg-slate-950 border-slate-800 text-slate-100 placeholder:text-slate-600 focus:border-blue-500"
+              className="w-full h-11 px-4 text-sm font-medium rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-all"
               autoFocus
             />
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button
+          <DialogFooter className="gap-2 sm:gap-3 pt-2">
+            <button
               type="button"
-              variant="outline"
               onClick={() => onOpenChange(false)}
-              className="border-slate-800 text-slate-300 hover:bg-slate-800"
+              className="linear-button-secondary h-10 rounded-xl text-xs uppercase tracking-wider"
             >
               Cancel
-            </Button>
-            <Button
+            </button>
+            <button
               type="submit"
               disabled={isPending || !name.trim()}
-              className="bg-blue-600 hover:bg-blue-500 text-white"
+              className="linear-button-primary h-10 rounded-xl text-xs uppercase tracking-wider disabled:opacity-50"
             >
               {isPending ? 'Creating...' : 'Create Folder'}
-            </Button>
+            </button>
           </DialogFooter>
         </form>
       </DialogContent>

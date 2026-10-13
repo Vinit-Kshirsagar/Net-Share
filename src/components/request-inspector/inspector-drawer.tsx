@@ -5,13 +5,9 @@ import {
   Activity,
   Clock,
   HardDrive,
-  CheckCircle2,
-  AlertCircle,
-  Shield,
-  Layers,
-  ArrowRight,
   Info,
-  Terminal
+  Shield,
+  Layers
 } from 'lucide-react'
 import {
   Sheet,
@@ -19,7 +15,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-import { Badge } from '@/components/ui/badge'
 import { TransferLogRow } from '@/types/netshare'
 import { formatBytes, formatDuration, formatThroughput } from '@/lib/utils'
 
@@ -30,14 +25,26 @@ interface RequestInspectorDrawerProps {
 }
 
 function getStatusBadge(code: number | null) {
-  if (!code) return <Badge variant="outline" className="border-slate-700 text-slate-400">Pending</Badge>
+  if (!code) return <span className="px-2 py-0.5 rounded-md border border-white/10 text-white/40 text-[10px] font-bold">Pending</span>
   if (code >= 200 && code < 300) {
-    return <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-mono">{code} OK</Badge>
+    return (
+      <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono text-[11px] font-bold">
+        {code} OK
+      </span>
+    )
   }
   if (code >= 400 && code < 500) {
-    return <Badge className="bg-amber-500/20 text-amber-400 border border-amber-500/30 font-mono">{code} Client Error</Badge>
+    return (
+      <span className="px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono text-[11px] font-bold">
+        {code} Client Error
+      </span>
+    )
   }
-  return <Badge className="bg-red-500/20 text-red-400 border border-red-500/30 font-mono">{code} Server Error</Badge>
+  return (
+    <span className="px-2.5 py-1 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 font-mono text-[11px] font-bold">
+      {code} Server Error
+    </span>
+  )
 }
 
 function getEndpointForOperation(op: string) {
@@ -67,15 +74,16 @@ export function RequestInspectorDrawer({
   if (!log) return null
 
   const endpointInfo = getEndpointForOperation(log.operation)
-  const isSuccess = (!log.status_code || log.status_code < 400) && !log.error_code
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="bg-slate-900 border-slate-800 text-slate-100 sm:max-w-lg overflow-y-auto">
-        <SheetHeader className="border-b border-slate-800 pb-4">
-          <SheetTitle className="text-white flex items-center justify-between text-base">
-            <div className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-blue-400" />
+      <SheetContent className="bg-[#111111] border-l border-white/10 text-white sm:max-w-lg overflow-y-auto p-6">
+        <SheetHeader className="border-b border-white/10 pb-5">
+          <SheetTitle className="text-white flex items-center justify-between text-base font-bold">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/10 flex items-center justify-center text-white">
+                <Activity className="h-4 w-4" />
+              </div>
               <span>HTTP Request Inspector</span>
             </div>
             {getStatusBadge(log.status_code)}
@@ -84,96 +92,96 @@ export function RequestInspectorDrawer({
 
         <div className="py-6 space-y-6 text-xs">
           {/* Operation & Method Overview */}
-          <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+          <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-slate-400 font-semibold uppercase text-[10px] tracking-wider">
+              <span className="text-white/40 font-bold uppercase text-[10px] tracking-[0.2em]">
                 Operation Type
               </span>
-              <span className="font-mono text-blue-400 font-bold uppercase">{log.operation}</span>
+              <span className="font-mono text-white font-bold uppercase">{log.operation}</span>
             </div>
 
-            <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 font-mono text-[11px] flex items-center gap-2">
-              <span className="px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 font-bold">
+            <div className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.06] font-mono text-[11px] flex items-center gap-2.5">
+              <span className="px-2 py-0.5 rounded bg-white text-black font-bold text-[10px]">
                 {endpointInfo.method}
               </span>
-              <span className="text-slate-300 truncate">{endpointInfo.path}</span>
+              <span className="text-white/80 truncate">{endpointInfo.path}</span>
             </div>
 
-            <div className="flex items-center justify-between text-[11px] text-slate-400">
-              <span>Request ID:</span>
-              <span className="font-mono text-slate-300">{log.request_id}</span>
+            <div className="flex items-center justify-between text-[11px] text-white/50 pt-1">
+              <span>Request Identifier:</span>
+              <span className="font-mono text-white/80">{log.request_id}</span>
             </div>
           </div>
 
           {/* Performance & Metrics Grid */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-              <div className="flex items-center gap-1.5 text-slate-400">
-                <Clock className="h-3.5 w-3.5 text-blue-400" />
+          <div className="grid grid-cols-2 gap-3.5">
+            <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-1">
+              <div className="flex items-center gap-1.5 text-white/50 text-[11px] uppercase font-bold tracking-wider">
+                <Clock className="h-3.5 w-3.5 text-amber-400" />
                 <span>Elapsed Duration</span>
               </div>
-              <div className="text-lg font-bold font-mono text-white">
+              <div className="text-xl font-bold font-mono text-white">
                 {formatDuration(log.duration_ms)}
               </div>
-              <div className="text-[10px] text-slate-500 font-mono">
-                Source: performance.now()
+              <div className="text-[10px] text-white/30 font-mono">
+                Source: DOMHighResTimeStamp
               </div>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-              <div className="flex items-center gap-1.5 text-slate-400">
+            <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-1">
+              <div className="flex items-center gap-1.5 text-white/50 text-[11px] uppercase font-bold tracking-wider">
                 <HardDrive className="h-3.5 w-3.5 text-emerald-400" />
-                <span>Observed Transfer</span>
+                <span>Payload Size</span>
               </div>
-              <div className="text-lg font-bold font-mono text-white">
+              <div className="text-xl font-bold font-mono text-white">
                 {formatBytes(log.bytes_transferred)}
               </div>
-              <div className="text-[10px] text-slate-500 font-mono">
+              <div className="text-[10px] text-white/30 font-mono">
                 {formatThroughput(log.bytes_transferred, log.duration_ms || 0)}
               </div>
             </div>
           </div>
 
           {/* Observable HTTP Headers */}
-          <div className="space-y-2">
-            <h4 className="font-semibold uppercase tracking-wider text-[10px] text-slate-400">
+          <div className="space-y-2.5">
+            <h4 className="font-bold uppercase tracking-[0.2em] text-[10px] text-white/40 px-1">
               Observable HTTP Protocol Headers
             </h4>
-            <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 font-mono text-[11px] space-y-2">
+            <div className="p-4 rounded-xl bg-black/40 border border-white/10 font-mono text-[11px] space-y-2.5">
               <div className="flex justify-between">
-                <span className="text-slate-500">Content-Type:</span>
-                <span className="text-slate-300">application/json, octet-stream</span>
+                <span className="text-white/40">Content-Type:</span>
+                <span className="text-white/80">application/json, octet-stream</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Content-Length:</span>
-                <span className="text-slate-300">{log.bytes_transferred} bytes</span>
+                <span className="text-white/40">Content-Length:</span>
+                <span className="text-white/80">{log.bytes_transferred} bytes</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Sec-Fetch-Mode:</span>
-                <span className="text-slate-300">cors</span>
+                <span className="text-white/40">Sec-Fetch-Mode:</span>
+                <span className="text-white/80">cors</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Security-Layer:</span>
-                <span className="text-emerald-400">TLS 1.3 (HTTPS Encrypted)</span>
+                <span className="text-white/40">Security-Layer:</span>
+                <span className="text-emerald-400 font-bold">TLS 1.3 (HTTPS Encrypted)</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Monotonic Timing:</span>
-                <span className="text-blue-400">DOMHighResTimeStamp</span>
+                <span className="text-white/40">Monotonic Timing:</span>
+                <span className="text-white font-bold">performance.now()</span>
               </div>
             </div>
           </div>
 
           {/* Educational Callout: Browser vs Transport Layer Observability */}
-          <div className="p-4 rounded-xl bg-blue-950/30 border border-blue-500/20 space-y-2">
-            <div className="flex items-center gap-2 font-semibold text-blue-300">
-              <Info className="h-4 w-4 shrink-0" />
+          <div className="p-5 rounded-xl bg-white/[0.02] border border-white/10 space-y-2.5">
+            <div className="flex items-center gap-2 font-bold text-white text-xs uppercase tracking-wide">
+              <Info className="h-4 w-4 shrink-0 text-white/60" />
               <span>Networking Observability Principle</span>
             </div>
-            <p className="text-[11px] text-slate-300 leading-relaxed">
-              Browser JavaScript operates strictly at <strong>Layer 7 (Application)</strong>. It can observe HTTP headers, status codes, payload sizes, and high-resolution start/end timings.
+            <p className="text-[11px] text-white/60 leading-relaxed">
+              Browser JavaScript operates strictly at <strong>Layer 7 (Application)</strong>. It observes HTTP status codes, headers, response payloads, and high-resolution start/end timings.
             </p>
-            <p className="text-[11px] text-slate-400 leading-relaxed">
-              Transport layer mechanics (raw TCP 3-way handshake SYN/ACK, retransmission, window size scaling) are managed transparently by the OS kernel and TLS stack. To inspect raw packets, use NetShare&apos;s <strong>Python TCP Socket Lab</strong> and <strong>Wireshark</strong>.
+            <p className="text-[11px] text-white/40 leading-relaxed">
+              Transport layer mechanics (raw TCP 3-way handshake SYN/ACK, retransmission, sliding window scaling) are managed transparently by the OS kernel. To inspect raw frames at Layer 4, use NetShare&apos;s <strong>Python TCP Socket Lab</strong> and <strong>Wireshark</strong>.
             </p>
           </div>
         </div>

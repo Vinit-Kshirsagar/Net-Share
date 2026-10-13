@@ -55,9 +55,9 @@ export default function RegisterPage() {
           return
         }
 
-        // If Supabase project requires email confirmation
+        // If confirmation is needed
         setSuccessMessage(
-          'Registration initiated! If email confirmation is enabled on your Supabase instance, please check your inbox. Otherwise, you can now sign in.'
+          'Registration initiated! If email confirmation is enabled, please check your inbox. Otherwise, proceed to sign in.'
         )
       } catch (err: unknown) {
         setErrorMessage(err instanceof Error ? err.message : 'An unexpected registration error occurred.')
@@ -66,112 +66,122 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
-      <div className="space-y-2 mb-6 text-center">
-        <h1 className="text-2xl font-bold tracking-tight text-white">Create NetShare Account</h1>
-        <p className="text-sm text-slate-400">
-          Set up a private account with dedicated storage namespace and telemetry tracking.
+    <div className="space-y-8 animate-fade-in">
+      {/* Eyebrow & Title */}
+      <div className="text-center space-y-3">
+        <div className="inline-flex items-center space-x-2.5 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[10px] font-bold text-white uppercase tracking-[0.3em] shadow-xl">
+          <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
+          <span>New Namespace Provisioning</span>
+        </div>
+
+        <h1 className="text-3xl sm:text-4xl font-black tracking-tightest leading-tight text-white">
+          Create NetShare <span className="text-white/40 italic">Account.</span>
+        </h1>
+        <p className="text-sm font-medium text-white/50 max-w-sm mx-auto leading-relaxed">
+          Initialize a dedicated PostgreSQL RLS namespace with private object storage.
         </p>
       </div>
 
-      {errorMessage && (
-        <div className="mb-5 p-3.5 rounded-lg bg-red-500/10 border border-red-500/30 flex items-start gap-2.5 text-sm text-red-400 animate-in fade-in">
-          <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
-          <span>{errorMessage}</span>
-        </div>
-      )}
+      {/* Register Card */}
+      <div className="linear-card p-6 sm:p-8 space-y-6">
+        {errorMessage && (
+          <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-start gap-3 text-xs font-medium text-red-400 animate-in fade-in">
+            <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
 
-      {successMessage && (
-        <div className="mb-5 p-3.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-start gap-2.5 text-sm text-emerald-400 animate-in fade-in">
-          <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
-          <div>
-            <p className="font-medium">Account created successfully</p>
-            <p className="text-xs text-emerald-400/80 mt-1">{successMessage}</p>
-            <Link
-              href="/login"
-              className="inline-block mt-2.5 text-xs font-semibold px-3 py-1.5 rounded bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-600/40"
+        {successMessage ? (
+          <div className="p-5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-start gap-3.5 text-xs text-emerald-300 animate-in fade-in">
+            <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-emerald-400" />
+            <div className="space-y-2">
+              <p className="font-bold text-white text-sm">Account Created Successfully</p>
+              <p className="text-white/60 leading-relaxed">{successMessage}</p>
+              <Link
+                href="/login"
+                className="linear-button-primary h-9 px-4 rounded-lg text-black text-xs font-bold uppercase tracking-wider inline-flex mt-2"
+              >
+                Proceed to Sign In →
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={handleRegister} className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/60">
+                Email Address
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="engineer@domain.com"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-white/40 focus:ring-1 focus:ring-white/40 text-sm font-medium transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/60">
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
+                <input
+                  type="password"
+                  required
+                  minLength={6}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="At least 6 characters"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-white/40 focus:ring-1 focus:ring-white/40 text-sm font-medium transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/60">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
+                <input
+                  type="password"
+                  required
+                  minLength={6}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Re-enter password"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-white/40 focus:ring-1 focus:ring-white/40 text-sm font-medium transition-all"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isPending}
+              className="linear-button-primary w-full h-12 rounded-xl text-black font-black text-[13px] uppercase tracking-wider mt-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Go to Sign In →
-            </Link>
-          </div>
-        </div>
-      )}
+              {isPending ? (
+                <div className="h-4 w-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+              ) : (
+                <>
+                  <UserPlus className="h-4 w-4 mr-1.5" /> Initialize Account
+                </>
+              )}
+            </button>
+          </form>
+        )}
+      </div>
 
-      {!successMessage && (
-        <form onSubmit={handleRegister} className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-              Email Address
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="user@example.com"
-                className="w-full pl-10 pr-3.5 py-2.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm transition-colors"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-              Password
-            </label>
-            <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-              <input
-                type="password"
-                required
-                minLength={6}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="At least 6 characters"
-                className="w-full pl-10 pr-3.5 py-2.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm transition-colors"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-              Confirm Password
-            </label>
-            <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-              <input
-                type="password"
-                required
-                minLength={6}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Re-type password"
-                className="w-full pl-10 pr-3.5 py-2.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm transition-colors"
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={isPending}
-            className="w-full mt-2 py-2.5 px-4 rounded-lg bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-medium text-sm flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-600/20"
-          >
-            {isPending ? (
-              <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            ) : (
-              <>
-                <UserPlus className="h-4 w-4" /> Create Account
-              </>
-            )}
-          </button>
-        </form>
-      )}
-
-      <div className="mt-5 text-center text-xs text-slate-400">
-        Already have an account?{' '}
-        <Link href="/login" className="text-blue-400 hover:text-blue-300 font-medium underline underline-offset-4">
-          Sign In
+      {/* Switch to Login */}
+      <div className="text-center text-xs text-white/40">
+        Already have a configured namespace?{' '}
+        <Link href="/login" className="text-white hover:underline underline-offset-4 font-bold ml-1">
+          Sign In →
         </Link>
       </div>
     </div>
