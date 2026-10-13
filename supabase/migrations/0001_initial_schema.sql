@@ -195,17 +195,26 @@ create policy "shares: allow read by token"
   to anon, authenticated
   using (true);
 
+-- Helper function with SECURITY DEFINER to bypass RLS recursion on public.files
+create or replace function public.user_owns_file(f_id uuid)
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.files
+    where id = f_id and owner_id = auth.uid()
+  );
+$$;
+
 drop policy if exists "shares: owner can insert" on public.shares;
 create policy "shares: owner can insert"
   on public.shares for insert
   to authenticated
   with check (
     owner_id = (select auth.uid())
-    and exists (
-      select 1 from public.files f
-      where f.id = file_id
-        and f.owner_id = (select auth.uid())
-    )
+    and public.user_owns_file(file_id)
   );
 
 drop policy if exists "shares: owner can update" on public.shares;
