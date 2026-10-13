@@ -146,6 +146,7 @@ See [`tcp-lab/WIREX_GUIDE.md`](./tcp-lab/WIRESHARK_GUIDE.md) for step-by-step in
 
 ## 📚 Technical Documentation
 
+- [Network Architecture, Protocol Tracking & Viva Guide](docs/NETWORK_AND_PROTOCOLS_GUIDE.md) *(Comprehensive guide explaining OSI layers, network telemetry, formulas, and defense Q&A)*
 - [System Architecture Document](docs/ARCHITECTURE.md)
 - [Networking Concepts & Viva Prep Guide](docs/NETWORKING_CONCEPTS.md)
 - [Wireshark Packet Capture Guide](tcp-lab/WIRESHARK_GUIDE.md)
