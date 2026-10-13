@@ -3,10 +3,7 @@
 import React, { useState } from 'react'
 import {
   Layers,
-  Globe,
   Shield,
-  Server,
-  Cpu,
   ArrowRight,
   CheckCircle2,
   Lock,
@@ -14,13 +11,12 @@ import {
   Terminal,
   Activity,
   Network,
-  BookOpen,
   ChevronDown,
-  HelpCircle
+  HelpCircle,
+  FileCode,
+  Globe
 } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { cn } from '@/lib/utils'
 
 interface VivaTopic {
   question: string
@@ -33,7 +29,7 @@ const VIVA_TOPICS: VivaTopic[] = [
     category: 'Transport Layer',
     question: 'Why does NetShare require message framing over TCP?',
     answer:
-      'TCP provides a stream of continuous bytes without preserving application message boundaries (write(100) on client may be received as read(40) + read(60) on server). Without a framing protocol like NetShare\'s NSHR (with magic bytes and big-endian payload length), the receiver cannot determine where one file chunk or metadata packet ends and the next begins.',
+      'TCP provides a stream of continuous bytes without preserving application message boundaries (a write(100) on client may be received as read(40) + read(60) on server). Without a framing protocol like NetShare\'s NSHR (with magic bytes and big-endian payload length), the receiver cannot determine where one file chunk or metadata packet ends and the next begins.',
   },
   {
     category: 'Transport Layer',
@@ -123,24 +119,36 @@ export default function ProtocolsPage() {
   ]
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
-      {/* ─── Page Header ────────────────────────────────────────────────────── */}
-      <div>
-        <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-          <Layers className="h-5 w-5 text-blue-400" />
-          Interactive Protocol Explorer
-        </h1>
-        <p className="text-xs text-slate-400 mt-0.5">
-          Comprehensive exploration of the networking protocol stack from Application (L7) down to Network (L3).
-        </p>
+    <div className="space-y-12 animate-fade-in">
+      {/* ─── Symmetrical Header matching compliance-checker ────────────────── */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-white/[0.1] pb-10">
+        <div className="space-y-4">
+          <div className="flex items-center space-x-3 text-[11px] font-bold text-white uppercase tracking-[0.4em]">
+            <Network className="w-4 h-4 text-white" />
+            <span>OSI & TCP/IP Model · Conceptual Architecture</span>
+          </div>
+
+          <h1 className="text-4xl sm:text-5xl font-black tracking-tightest leading-tight text-white">
+            Interactive <span className="text-white/40 italic">Protocol Explorer.</span>
+          </h1>
+
+          <p className="text-base font-medium text-white/50 max-w-2xl leading-relaxed">
+            Examine how files traverse from Application layer (HTTP/1.1 vs HTTP/2 vs HTTP/3) down through TLS 1.3 presentation, TCP stream sockets, and IP packet transmission.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/10 text-xs text-white/60 font-mono shrink-0">
+          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span>RFC 9110 / RFC 8446 SPEC</span>
+        </div>
       </div>
 
-      {/* ─── Layer Selector & Deep Dive ─────────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* ─── Layer Selector & Deep Dive Grid ─────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Layer Selection Stack */}
-        <div className="space-y-2">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400 px-1">
-            OSI / TCP-IP Protocol Stack
+        <div className="space-y-3">
+          <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/40 px-1">
+            Protocol Stack Hierarchy
           </h2>
 
           {[
@@ -148,292 +156,295 @@ export default function ProtocolsPage() {
               id: 'l7',
               name: 'Layer 7: Application',
               protocols: 'HTTP/1.1 • HTTP/2 • HTTP/3',
-              color: 'border-blue-500/40 text-blue-400 bg-blue-500/10',
               badge: 'REST & Fetch API',
             },
             {
               id: 'l6',
               name: 'Layer 6: Presentation / Security',
               protocols: 'TLS 1.3 • HTTPS • AES-GCM',
-              color: 'border-emerald-500/40 text-emerald-400 bg-emerald-500/10',
               badge: 'Symmetric & Asymmetric Crypto',
             },
             {
               id: 'l4',
               name: 'Layer 4: Transport',
-              protocols: 'TCP • UDP • QUIC',
-              color: 'border-amber-500/40 text-amber-400 bg-amber-500/10',
-              badge: 'Byte Streams & Framing',
+              protocols: 'TCP (Stream) • UDP (QUIC Datagram)',
+              badge: 'NSHR Binary Framing Lab',
             },
             {
               id: 'l3',
-              name: 'Layer 3: Network',
-              protocols: 'IPv4 • IPv6 • Routing & TTL',
-              color: 'border-purple-500/40 text-purple-400 bg-purple-500/10',
-              badge: 'Packets & MTU',
+              name: 'Layer 3: Network / Routing',
+              protocols: 'IPv4 • IPv6 • MTU Framing (1500B)',
+              badge: 'Packet Fragmentation',
             },
-          ].map((l) => (
-            <button
-              key={l.id}
-              onClick={() => setSelectedLayer(l.id as any)}
-              className={`w-full text-left p-3.5 rounded-xl border transition-all ${
-                selectedLayer === l.id
-                  ? `${l.color} shadow-lg shadow-blue-500/5`
-                  : 'border-slate-800 bg-slate-900/50 hover:bg-slate-900 hover:border-slate-700 text-slate-300'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-1">
-                <span className="font-semibold text-xs text-white">{l.name}</span>
-                <Badge variant="outline" className="text-[10px] border-slate-700">
-                  {l.badge}
-                </Badge>
-              </div>
-              <p className="font-mono text-[11px] text-slate-400">{l.protocols}</p>
-            </button>
-          ))}
-        </div>
-
-        {/* Detailed Explanation for Selected Layer */}
-        <div className="lg:col-span-2 p-5 sm:p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-4">
-          {selectedLayer === 'l7' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <Globe className="h-5 w-5 text-blue-400" /> Layer 7: HTTP & Application Semantics
-                </h3>
-                <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs font-mono">
-                  HTTP/1.1 vs HTTP/2 vs HTTP/3
-                </Badge>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1.5">
-                  <span className="font-bold text-blue-400">HTTP/1.1 (1997)</span>
-                  <p className="text-slate-400 leading-relaxed text-[11px]">
-                    Text-based headers. Single request-response cycle per connection by default unless keep-alive is maintained. Suffers from head-of-line blocking at the HTTP layer.
-                  </p>
-                </div>
-                <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1.5">
-                  <span className="font-bold text-emerald-400">HTTP/2 (2015)</span>
-                  <p className="text-slate-400 leading-relaxed text-[11px]">
-                    Binary framing layer. Multiplexes multiple streams over a single TCP connection. Uses HPACK header compression. Still suffers from TCP-level head-of-line blocking on packet drops.
-                  </p>
-                </div>
-                <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1.5">
-                  <span className="font-bold text-indigo-400">HTTP/3 (2022)</span>
-                  <p className="text-slate-400 leading-relaxed text-[11px]">
-                    Built on QUIC over UDP. Streams are independent at the transport layer, completely eliminating head-of-line blocking across connections. Features 0-RTT connection resumption.
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2 text-xs">
-                <h4 className="font-semibold text-slate-200">How NetShare Implements L7:</h4>
-                <ul className="space-y-1.5 text-slate-400 text-[11px] list-disc list-inside">
-                  <li>Direct authenticated file uploads bypass function body proxy limits.</li>
-                  <li>Strict HTTP status code discipline (200 OK, 201 Created, 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 410 Gone).</li>
-                  <li>Monotonic timing benchmarks capture exact application durations with <code className="text-blue-400">performance.now()</code>.</li>
-                </ul>
-              </div>
-            </div>
-          )}
-
-          {selectedLayer === 'l6' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-emerald-400" /> Layer 6: TLS 1.3 & HTTPS Encryption
-                </h3>
-                <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs font-mono">
-                  End-to-End Cryptography
-                </Badge>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-                  <span className="font-semibold text-emerald-400 flex items-center gap-1.5">
-                    <Lock className="h-3.5 w-3.5" /> 1-RTT Handshake
+          ].map((layer) => {
+            const isSelected = selectedLayer === layer.id
+            return (
+              <div
+                key={layer.id}
+                onClick={() => setSelectedLayer(layer.id as any)}
+                className={cn(
+                  'linear-card p-5 cursor-pointer transition-all space-y-2 group',
+                  isSelected
+                    ? 'border-white bg-[#141414] shadow-xl'
+                    : 'hover:border-white/20'
+                )}
+              >
+                <div className="flex items-center justify-between">
+                  <span className={cn('text-sm font-bold tracking-tight', isSelected ? 'text-white' : 'text-white/80 group-hover:text-white')}>
+                    {layer.name}
                   </span>
-                  <p className="text-slate-400 text-[11px] leading-relaxed">
-                    TLS 1.3 reduces the handshake from 2 round trips (in TLS 1.2) to just 1 RTT. Ephemeral Diffie-Hellman keys are exchanged immediately during the ClientHello, providing Forward Secrecy.
-                  </p>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-                  <span className="font-semibold text-emerald-400 flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5" /> AEAD Symmetric Ciphers
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/[0.05] border border-white/10 text-white/60">
+                    {layer.badge}
                   </span>
-                  <p className="text-slate-400 text-[11px] leading-relaxed">
-                    Once the session key is derived, data is encrypted and authenticated using AES-256-GCM or ChaCha20-Poly1305. Payloads in transit cannot be read or forged by intermediate routers.
+                </div>
+                <p className="text-xs font-mono text-white/40">{layer.protocols}</p>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Detailed Layer Inspection Window */}
+        <div className="lg:col-span-2">
+          <div className="linear-card p-6 sm:p-8 space-y-6">
+            {/* Window bar */}
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 rounded-full bg-white/20" />
+                <div className="w-3 h-3 rounded-full bg-white/20" />
+                <div className="w-3 h-3 rounded-full bg-white/20" />
+              </div>
+              <span className="text-[10px] font-mono font-bold uppercase tracking-[0.3em] text-white/30">
+                PROTOCOL_NODE_{selectedLayer.toUpperCase()}
+              </span>
+            </div>
+
+            {selectedLayer === 'l7' && (
+              <div className="space-y-6 animate-fade-in">
+                <div className="space-y-2">
+                  <div className="inline-flex px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-[10px] font-bold tracking-widest uppercase text-white">
+                    Application Layer (L7)
+                  </div>
+                  <h3 className="text-2xl font-black tracking-tight text-white">
+                    HTTP/1.1 vs HTTP/2 vs HTTP/3 (QUIC)
+                  </h3>
+                  <p className="text-sm font-medium text-white/60 leading-relaxed">
+                    NetShare transmits file payloads directly to storage via standard HTTP PUT/POST multipart streams, eliminating memory overhead on API functions.
                   </p>
                 </div>
-              </div>
 
-              <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400 space-y-1">
-                <span className="font-semibold text-slate-200">Browser Security vs Wireshark:</span>
-                <p className="text-[11px] leading-relaxed">
-                  In a Wireshark capture of HTTPS traffic, all HTTP payloads and URL paths appear as encrypted application data. To demonstrate inspectable protocol frames and raw socket behaviors, NetShare provides the standalone <strong>Python TCP Socket Lab</strong>.
-                </p>
-              </div>
-            </div>
-          )}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
+                  <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-2">
+                    <div className="font-bold text-white uppercase text-[11px]">HTTP/1.1 (1997)</div>
+                    <p className="text-white/50 text-[11px] leading-relaxed">
+                      Plaintext textual protocol. Suffers from Head-of-Line (HoL) blocking on single TCP connection; requires multiple sockets for concurrent requests.
+                    </p>
+                  </div>
 
-          {selectedLayer === 'l4' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <Server className="h-5 w-5 text-amber-400" /> Layer 4: TCP vs UDP Transport Mechanisms
-                </h3>
-                <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs font-mono">
-                  Socket Programming & Framing
-                </Badge>
-              </div>
+                  <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-2">
+                    <div className="font-bold text-white uppercase text-[11px]">HTTP/2 (2015)</div>
+                    <p className="text-white/50 text-[11px] leading-relaxed">
+                      Binary framing layer multiplexes multiple streams over a single TCP connection with HPACK header compression. Still suffers TCP-level HoL blocking.
+                    </p>
+                  </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-                  <span className="font-bold text-amber-400">Transmission Control Protocol (TCP)</span>
-                  <ul className="text-slate-400 text-[11px] space-y-1 list-disc list-inside">
-                    <li>3-way handshake: SYN → SYN-ACK → ACK</li>
-                    <li>Guaranteed in-order delivery via Sequence & ACK numbers</li>
-                    <li>Sliding window flow control & Slow-Start congestion avoidance</li>
-                    <li>Teardown via FIN / ACK or emergency RST</li>
-                  </ul>
+                  <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-2">
+                    <div className="font-bold text-emerald-400 uppercase text-[11px]">HTTP/3 (2022)</div>
+                    <p className="text-white/50 text-[11px] leading-relaxed">
+                      Replaces TCP with QUIC over UDP. Multiplexed streams are independent; packet loss on one stream does not stall unrelated streams.
+                    </p>
+                  </div>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-                  <span className="font-bold text-indigo-400">User Datagram Protocol (UDP)</span>
-                  <ul className="text-slate-400 text-[11px] space-y-1 list-disc list-inside">
-                    <li>No connection establishment (zero handshake overhead)</li>
-                    <li>Datagram preservation: recvfrom() returns exact sent packets</li>
-                    <li>No retransmission, ordering, or congestion management</li>
-                    <li>Foundational layer for DNS, WebRTC, and QUIC (HTTP/3)</li>
-                  </ul>
+                <div className="p-4 rounded-xl bg-white/[0.02] border border-white/10 space-y-2 font-mono text-[11px]">
+                  <span className="text-white/40 uppercase tracking-widest text-[10px] font-bold block">
+                    Observed NetShare L7 Headers
+                  </span>
+                  <div className="text-white/80">POST /api/files HTTP/1.1</div>
+                  <div className="text-white/40">Host: netshare.lab</div>
+                  <div className="text-white/40">Content-Type: application/json</div>
+                  <div className="text-white/40">Authorization: Bearer [JWT_SESSION_TOKEN]</div>
+                  <div className="text-emerald-400">X-Sha256-Checksum: e3b0c44298fc1c149afbf4c8996fb92427ae...</div>
                 </div>
               </div>
+            )}
 
-              <div className="p-3.5 rounded-xl bg-amber-950/20 border border-amber-500/20 text-xs text-amber-300">
-                <span className="font-semibold block mb-1">Why TCP requires NetShare Framing:</span>
-                <p className="text-[11px] text-slate-300 leading-relaxed">
-                  TCP is a byte stream with no knowledge of records. NetShare defines the <code className="text-amber-400 font-mono">NSHR</code> binary frame header (Magic + Version + Type + 32-bit Payload Length) to ensure safe, bounded parsing over TCP sockets.
-                </p>
-              </div>
-            </div>
-          )}
+            {selectedLayer === 'l6' && (
+              <div className="space-y-6 animate-fade-in">
+                <div className="space-y-2">
+                  <div className="inline-flex px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-[10px] font-bold tracking-widest uppercase text-white">
+                    Presentation & Security (L6)
+                  </div>
+                  <h3 className="text-2xl font-black tracking-tight text-white">
+                    Transport Layer Security (TLS 1.3)
+                  </h3>
+                  <p className="text-sm font-medium text-white/60 leading-relaxed">
+                    NetShare mandates TLS 1.3 for all web interactions, reducing the cryptographic handshake from 2 round-trips (TLS 1.2) to 1 round-trip (1-RTT) while enforcing Forward Secrecy.
+                  </p>
+                </div>
 
-          {selectedLayer === 'l3' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <Network className="h-5 w-5 text-purple-400" /> Layer 3: IP Addressing & Packet Routing
-                </h3>
-                <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs font-mono">
-                  IP Datagrams & MTU
-                </Badge>
-              </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+                  <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-2">
+                    <div className="font-bold text-white text-[11px] uppercase">1-RTT Handshake</div>
+                    <p className="text-white/50 text-[11px] leading-relaxed">
+                      Client Hello sends Diffie-Hellman key share immediately in the initial flight. Server responds with Server Hello and Finished in single round trip.
+                    </p>
+                  </div>
 
-              <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2 text-xs">
-                <h4 className="font-semibold text-slate-200">MTU & Maximum Segment Size (MSS):</h4>
-                <p className="text-slate-400 text-[11px] leading-relaxed">
-                  Standard Ethernet networks have a Maximum Transmission Unit (MTU) of <strong>1500 bytes</strong>. After deducting 20 bytes of IPv4 header and 20 bytes of TCP header, the default Maximum Segment Size (MSS) is <strong>1460 bytes</strong>. Large file transfers are fragmented into thousands of MSS-sized TCP segments across the network.
-                </p>
-                <div className="mt-2 pt-2 border-t border-slate-800 flex justify-between font-mono text-[10px] text-slate-400">
-                  <span>Ethernet Frame (1518B)</span>
-                  <span>IP Packet (1500B)</span>
-                  <span>TCP Segment (1460B MSS)</span>
+                  <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-2">
+                    <div className="font-bold text-emerald-400 text-[11px] uppercase">Removed Insecure Ciphers</div>
+                    <p className="text-white/50 text-[11px] leading-relaxed">
+                      Deprecated RSA key transport, static DH, CBC-mode ciphers, SHA-1, and RC4. Enforces AEAD ciphers only (AES-GCM, ChaCha20-Poly1305).
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
-      </div>
+            )}
 
-      {/* ─── End-to-End Request Lifecycle Stepper ────────────────────────────── */}
-      <div className="p-6 rounded-2xl bg-slate-900/50 border border-slate-800 space-y-4">
-        <div>
-          <h2 className="text-base font-bold text-white flex items-center gap-2">
-            <Zap className="h-5 w-5 text-blue-400" />
-            End-to-End File Transfer Lifecycle
-          </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Step-by-step walkthrough of what happens beneath the surface during a NetShare file transfer.
-          </p>
-        </div>
+            {selectedLayer === 'l4' && (
+              <div className="space-y-6 animate-fade-in">
+                <div className="space-y-2">
+                  <div className="inline-flex px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-[10px] font-bold tracking-widest uppercase text-white">
+                    Transport Layer (L4)
+                  </div>
+                  <h3 className="text-2xl font-black tracking-tight text-white">
+                    TCP Stream Mechanics & Binary Framing (NSHR)
+                  </h3>
+                  <p className="text-sm font-medium text-white/60 leading-relaxed">
+                    TCP is a byte stream without message boundaries. NetShare implements a custom 10-byte binary header protocol in Python (<code className="font-mono text-white">tcp-lab/</code>) with loop reading (<code className="font-mono text-white">recv_exact</code>) to guarantee reliable file framing.
+                  </p>
+                </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 pt-2">
-          {LIFECYCLE_STEPS.map((step, idx) => (
-            <button
-              key={idx}
-              onClick={() => setActiveStep(idx)}
-              className={`p-3 rounded-xl border text-left transition-all ${
-                activeStep === idx
-                  ? 'border-blue-500 bg-blue-500/15 text-white'
-                  : 'border-slate-800 bg-slate-950 text-slate-400 hover:border-slate-700'
-              }`}
-            >
-              <div className="text-[10px] font-mono text-blue-400 mb-1">Step {idx + 1}</div>
-              <div className="font-semibold text-xs truncate text-slate-200">{step.title.split('. ')[1]}</div>
-              <div className="text-[10px] text-slate-500 truncate mt-0.5">{step.layer}</div>
-            </button>
-          ))}
-        </div>
+                <div className="p-4 rounded-xl bg-black/40 border border-white/10 font-mono text-[11px] space-y-2">
+                  <span className="text-white/40 uppercase tracking-widest text-[10px] font-bold block">
+                    NSHR 10-Byte Fixed Binary Frame Header
+                  </span>
+                  <div className="text-white/80">+-------------------+---------------+-------------------+---------------------+</div>
+                  <div className="text-white/80">| Magic (4 bytes)   | Version (1B)  | Msg Type (1 Byte) | Payload Length (4B) |</div>
+                  <div className="text-white/80">| &quot;NSHR&quot; (ASCII)    | 0x01          | 0x01-0x06         | Big-Endian uint32   |</div>
+                  <div className="text-white/80">+-------------------+---------------+-------------------+---------------------+</div>
+                  <div className="text-white/40">| Payload: 0 to 65,536 bytes (JSON metadata or raw file bytes)                    |</div>
+                  <div className="text-white/80">+---------------------------------------------------------------------------------+</div>
+                </div>
+              </div>
+            )}
 
-        {/* Selected Step Explanation Card */}
-        <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1.5 animate-in fade-in">
-          <div className="flex items-center gap-2">
-            <Badge className="bg-blue-600/30 text-blue-300 border-blue-500/40 text-[10px] font-mono">
-              {LIFECYCLE_STEPS[activeStep].layer}
-            </Badge>
-            <h4 className="font-bold text-sm text-white">{LIFECYCLE_STEPS[activeStep].title}</h4>
+            {selectedLayer === 'l3' && (
+              <div className="space-y-6 animate-fade-in">
+                <div className="space-y-2">
+                  <div className="inline-flex px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-[10px] font-bold tracking-widest uppercase text-white">
+                    Network Layer (L3)
+                  </div>
+                  <h3 className="text-2xl font-black tracking-tight text-white">
+                    IP Addressing, MTU (1500B) & MSS (1460B)
+                  </h3>
+                  <p className="text-sm font-medium text-white/60 leading-relaxed">
+                    At the Network layer, packets are routed using IP addresses. Standard Ethernet Maximum Transmission Unit (MTU) is 1500 bytes. With 20B IPv4 + 20B TCP header, the Maximum Segment Size (MSS) is 1460 bytes.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-xs font-mono">
+                  <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-1">
+                    <span className="text-white/40 text-[10px] uppercase">Ethernet MTU</span>
+                    <div className="text-xl font-bold text-white">1500 Bytes</div>
+                    <p className="text-white/40 text-[11px]">Maximum L3 packet size before fragmentation</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-1">
+                    <span className="text-white/40 text-[10px] uppercase">TCP MSS</span>
+                    <div className="text-xl font-bold text-white">1460 Bytes</div>
+                    <p className="text-white/40 text-[11px]">Payload limit per TCP segment</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-          <p className="text-xs text-slate-300 leading-relaxed pt-1">
-            {LIFECYCLE_STEPS[activeStep].desc}
-          </p>
         </div>
       </div>
 
-      {/* ─── Viva / Project Defense Preparation ───────────────────────────────── */}
-      <div className="p-6 rounded-2xl bg-slate-900/50 border border-slate-800 space-y-4">
-        <div>
-          <h2 className="text-base font-bold text-white flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-emerald-400" />
-            Project Viva & Defense Technical Reference
+      {/* ─── End-to-End File Lifecycle Stepper ───────────────────────────────── */}
+      <div className="space-y-6 pt-4 border-t border-white/[0.08]">
+        <div className="space-y-2">
+          <div className="flex items-center space-x-3 text-[11px] font-bold text-white uppercase tracking-[0.4em]">
+            <Activity className="w-4 h-4 text-white/60" />
+            <span>Interactive Transmission Sequence</span>
+          </div>
+          <h2 className="text-3xl font-black tracking-tight text-white">
+            End-to-End File Lifecycle in NetShare
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Key theoretical and practical questions prepared directly from the NetShare Computer Networks syllabus.
+          <p className="text-sm font-medium text-white/50 max-w-xl">
+            Step through how a single file is transferred, hashed, routed, and recorded across the networking stack.
           </p>
         </div>
 
-        <div className="space-y-2.5">
-          {VIVA_TOPICS.map((item, idx) => {
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {LIFECYCLE_STEPS.map((step, idx) => {
+            const isCurrent = activeStep === idx
+            return (
+              <div
+                key={step.title}
+                onClick={() => setActiveStep(idx)}
+                className={cn(
+                  'linear-card p-5 cursor-pointer transition-all space-y-3 group',
+                  isCurrent ? 'border-white bg-[#141414]' : 'hover:border-white/20'
+                )}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-white/40">
+                    Step {idx + 1}
+                  </span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/10 text-white/60">
+                    {step.layer}
+                  </span>
+                </div>
+                <h4 className="text-sm font-bold text-white tracking-tight">{step.title}</h4>
+                <p className="text-xs font-medium text-white/50 leading-relaxed">{step.desc}</p>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* ─── Viva & Exam Oral Preparation Cards ─────────────────────────────── */}
+      <div className="space-y-6 pt-4 border-t border-white/[0.08]">
+        <div className="space-y-2">
+          <div className="flex items-center space-x-3 text-[11px] font-bold text-white uppercase tracking-[0.4em]">
+            <HelpCircle className="w-4 h-4 text-white/60" />
+            <span>Evaluation & Viva Prep</span>
+          </div>
+          <h2 className="text-3xl font-black tracking-tight text-white">
+            Core Networking Defense Questions
+          </h2>
+          <p className="text-sm font-medium text-white/50 max-w-xl">
+            Key concepts evaluated during the Computer Networks lab viva presentation.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {VIVA_TOPICS.map((topic, idx) => {
             const isExpanded = expandedVivaIndex === idx
             return (
               <div
-                key={idx}
-                className="rounded-xl border border-slate-800 bg-slate-950/80 overflow-hidden transition-all"
+                key={topic.question}
+                onClick={() => setExpandedVivaIndex(isExpanded ? null : idx)}
+                className="linear-card p-6 cursor-pointer hover:border-white/30 transition-all space-y-3 group"
               >
-                <button
-                  onClick={() => setExpandedVivaIndex(isExpanded ? null : idx)}
-                  className="w-full p-4 text-left flex items-center justify-between gap-4 hover:bg-slate-900/50"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <Badge variant="outline" className="text-[10px] border-slate-700 text-slate-400 shrink-0">
-                      {item.category}
-                    </Badge>
-                    <span className="text-xs font-semibold text-slate-200 truncate">
-                      {item.question}
-                    </span>
-                  </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-white/40">
+                    {topic.category}
+                  </span>
                   <ChevronDown
-                    className={`h-4 w-4 text-slate-500 shrink-0 transition-transform ${
-                      isExpanded ? 'rotate-180 text-blue-400' : ''
-                    }`}
+                    className={cn(
+                      'h-4 w-4 text-white/40 transition-transform duration-300',
+                      isExpanded ? 'rotate-180 text-white' : 'group-hover:text-white'
+                    )}
                   />
-                </button>
-
+                </div>
+                <h4 className="text-sm font-bold text-white tracking-tight leading-snug">
+                  {topic.question}
+                </h4>
                 {isExpanded && (
-                  <div className="px-4 pb-4 pt-1 text-xs text-slate-300 leading-relaxed border-t border-slate-900 bg-slate-900/20">
-                    {item.answer}
-                  </div>
+                  <p className="text-xs font-medium text-white/70 leading-relaxed pt-2 border-t border-white/[0.08] animate-in fade-in">
+                    {topic.answer}
+                  </p>
                 )}
               </div>
             )
