@@ -51,6 +51,7 @@ export interface Database {
           mime_type: string | null
           size_bytes: number
           checksum_sha256: string | null
+          is_public: boolean
           created_at: string
           updated_at: string
         }
@@ -63,6 +64,7 @@ export interface Database {
           mime_type?: string | null
           size_bytes: number
           checksum_sha256?: string | null
+          is_public?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -75,6 +77,7 @@ export interface Database {
           mime_type?: string | null
           size_bytes?: number
           checksum_sha256?: string | null
+          is_public?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -131,7 +134,7 @@ export interface Database {
           id: string
           user_id: string | null
           request_id: string
-          operation: 'upload' | 'download' | 'delete' | 'rename' | 'share' | 'tcp_test'
+          operation: string
           status_code: number | null
           duration_ms: number | null
           bytes_transferred: number
@@ -142,7 +145,7 @@ export interface Database {
           id?: string
           user_id?: string | null
           request_id: string
-          operation: 'upload' | 'download' | 'delete' | 'rename' | 'share' | 'tcp_test'
+          operation: string
           status_code?: number | null
           duration_ms?: number | null
           bytes_transferred?: number
@@ -153,7 +156,7 @@ export interface Database {
           id?: string
           user_id?: string | null
           request_id?: string
-          operation?: 'upload' | 'download' | 'delete' | 'rename' | 'share' | 'tcp_test'
+          operation?: string
           status_code?: number | null
           duration_ms?: number | null
           bytes_transferred?: number
@@ -175,8 +178,8 @@ export interface Database {
           id?: string
           user_id: string
           experiment_type: string
-          parameters: Json
-          results: Json
+          parameters?: Json
+          results?: Json
           created_at?: string
         }
         Update: {

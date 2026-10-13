@@ -22,17 +22,30 @@ export async function GET(request: Request) {
     const query = searchParams.get('q')
     const sortBy = searchParams.get('sortBy') || 'created_at'
     const sortOrder = searchParams.get('sortOrder') === 'asc' ? true : false
+    const scope = searchParams.get('scope') || 'all' // 'all', 'mine', or 'public'
 
-    let dbQuery = supabase
-      .from('files')
-      .select('*')
-      .eq('owner_id', user.id)
+    let dbQuery = supabase.from('files').select('*')
 
-    // Folder filtering
-    if (folderId === 'root' || !folderId) {
-      dbQuery = dbQuery.is('folder_id', null)
+    if (scope === 'public') {
+      // Query all files marked as public across all users
+      dbQuery = dbQuery.eq('is_public', true)
+    } else if (scope === 'mine') {
+      // Query only the current user's files
+      dbQuery = dbQuery.eq('owner_id', user.id)
+      if (folderId === 'root' || !folderId) {
+        dbQuery = dbQuery.is('folder_id', null)
+      } else {
+        dbQuery = dbQuery.eq('folder_id', folderId)
+      }
     } else {
-      dbQuery = dbQuery.eq('folder_id', folderId)
+      // Default: 'all'
+      // If at root level, show user's root files OR any publicly shared files
+      if (folderId === 'root' || !folderId) {
+        dbQuery = dbQuery.or(`and(owner_id.eq.${user.id},folder_id.is.null),is_public.eq.true`)
+      } else {
+        // Inside a specific folder, show that folder's contents
+        dbQuery = dbQuery.eq('owner_id', user.id).eq('folder_id', folderId)
+      }
     }
 
     // Name search
@@ -52,7 +65,7 @@ export async function GET(request: Request) {
       )
     }
 
-    return NextResponse.json({ data: files ?? [] })
+    return NextResponse.json({ data: files ?? [], currentUserId: user.id })
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Internal Server Error'
     return NextResponse.json(

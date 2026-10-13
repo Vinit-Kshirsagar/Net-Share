@@ -83,7 +83,7 @@ export async function PATCH(
     }
 
     const body = await request.json()
-    const updates: { name?: string; folder_id?: string | null } = {}
+    const updates: { name?: string; folder_id?: string | null; is_public?: boolean } = {}
 
     if (body.name !== undefined) {
       if (typeof body.name !== 'string' || body.name.trim().length === 0 || body.name.length > 255) {
@@ -93,6 +93,17 @@ export async function PATCH(
         )
       }
       updates.name = body.name.trim()
+    }
+
+    // Handle is_public toggle
+    if (body.isPublic !== undefined) {
+      if (typeof body.isPublic !== 'boolean') {
+        return NextResponse.json(
+          { error: { message: 'isPublic must be a boolean.', status: 400 } },
+          { status: 400 }
+        )
+      }
+      updates.is_public = body.isPublic
     }
 
     if (body.folderId !== undefined) {

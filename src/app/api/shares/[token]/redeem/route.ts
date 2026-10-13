@@ -78,10 +78,10 @@ export async function POST(
       )
     }
 
-    // Generate short-lived signed download URL (60 seconds)
+    // Generate 10-minute signed download URL (600 seconds)
     const { data: signedData, error: signError } = await supabase.storage
       .from('netshare-files')
-      .createSignedUrl(file.storage_path, 60, {
+      .createSignedUrl(file.storage_path, 600, {
         download: file.name,
       })
 

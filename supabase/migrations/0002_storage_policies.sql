@@ -1,48 +1,60 @@
--- NetShare — Supabase Storage bucket policy setup
--- Run after creating the 'netshare-files' private bucket in the Supabase dashboard.
+-- NetShare — Supabase Storage bucket & Row Level Security setup
+-- Run this in the Supabase Dashboard -> SQL Editor
 -- Migration: 0002_storage_policies.sql
 
--- ─── Storage bucket policies ─────────────────────────────────────────────────
--- The bucket 'netshare-files' MUST be created as PRIVATE in the Supabase
--- Storage dashboard before applying these policies.
---
--- Policy design:
---   - Objects are stored at path: {user_id}/{file_uuid}
---   - Users can only operate on objects under their own {user_id}/ prefix
---   - No public access; all downloads require authenticated session or signed URL
-
--- Allow authenticated users to upload to their own namespace
-insert into storage.policies (name, bucket_id, operation, definition)
-values (
-  'netshare: owner can upload',
+-- ─── 1. Create 'netshare-files' Private Bucket ───────────────────────────────
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
   'netshare-files',
-  'INSERT',
-  'auth.uid()::text = (storage.foldername(name))[1]'
+  'netshare-files',
+  false,
+  104857600, -- 100 MB limit per file
+  null       -- Allow all MIME types
+)
+ON CONFLICT (id) DO UPDATE SET public = false;
+
+-- ─── 2. Clean Up Any Pre-existing Policies ───────────────────────────────────
+DROP POLICY IF EXISTS "netshare: owner can upload" ON storage.objects;
+DROP POLICY IF EXISTS "netshare: owner can read" ON storage.objects;
+DROP POLICY IF EXISTS "netshare: owner can update" ON storage.objects;
+DROP POLICY IF EXISTS "netshare: owner can delete" ON storage.objects;
+
+-- ─── 3. Storage Object RLS Policies ──────────────────────────────────────────
+-- Namespace design: {user_id}/{file_uuid}-{filename}
+-- Users can only operate on objects where the root folder matches their auth.uid().
+
+-- Allow authenticated users to upload directly to their own folder
+CREATE POLICY "netshare: owner can upload"
+ON storage.objects FOR INSERT
+TO authenticated
+WITH CHECK (
+  bucket_id = 'netshare-files'
+  AND (storage.foldername(name))[1] = auth.uid()::text
 );
 
 -- Allow authenticated users to read/download their own objects
-insert into storage.policies (name, bucket_id, operation, definition)
-values (
-  'netshare: owner can read',
-  'netshare-files',
-  'SELECT',
-  'auth.uid()::text = (storage.foldername(name))[1]'
+CREATE POLICY "netshare: owner can read"
+ON storage.objects FOR SELECT
+TO authenticated
+USING (
+  bucket_id = 'netshare-files'
+  AND (storage.foldername(name))[1] = auth.uid()::text
 );
 
--- Allow authenticated users to update (replace) their own objects
-insert into storage.policies (name, bucket_id, operation, definition)
-values (
-  'netshare: owner can update',
-  'netshare-files',
-  'UPDATE',
-  'auth.uid()::text = (storage.foldername(name))[1]'
+-- Allow authenticated users to update/replace their own objects
+CREATE POLICY "netshare: owner can update"
+ON storage.objects FOR UPDATE
+TO authenticated
+USING (
+  bucket_id = 'netshare-files'
+  AND (storage.foldername(name))[1] = auth.uid()::text
 );
 
 -- Allow authenticated users to delete their own objects
-insert into storage.policies (name, bucket_id, operation, definition)
-values (
-  'netshare: owner can delete',
-  'netshare-files',
-  'DELETE',
-  'auth.uid()::text = (storage.foldername(name))[1]'
+CREATE POLICY "netshare: owner can delete"
+ON storage.objects FOR DELETE
+TO authenticated
+USING (
+  bucket_id = 'netshare-files'
+  AND (storage.foldername(name))[1] = auth.uid()::text
 );
